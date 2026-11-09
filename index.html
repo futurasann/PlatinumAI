@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f3f4f7">
+<title>PlatinumAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+<style>
+:root{--bg:#f3f4f7;--surface:#fff;--side:#eceef2;--line:#dfe2e8;--ink:#14171c;--mute:#6b7280;--soft:#e6e9ef;--accent:#4f5fd9;--accent-ink:#fff;--danger:#dc2626;--code:#14171c;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1115;--surface:#171a20;--side:#13151a;--line:#262a33;--ink:#eceef2;--mute:#9099a8;--soft:#20242d;--accent:#7b8aff;--accent-ink:#0f1115;--code:#0b0c10}}
+:root[data-theme=dark]{--bg:#0f1115;--surface:#171a20;--side:#13151a;--line:#262a33;--ink:#eceef2;--mute:#9099a8;--soft:#20242d;--accent:#7b8aff;--accent-ink:#0f1115;--code:#0b0c10}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);display:flex;overflow:hidden;padding-top:var(--sat)}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
+.app{display:flex;width:100%;height:100%}
+.sidebar{width:280px;flex-shrink:0;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:16px 12px calc(12px + var(--sab));gap:14px;transition:transform .35s cubic-bezier(.16,1,.3,1),margin .35s cubic-bezier(.16,1,.3,1)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.05rem;padding:4px 8px}
+.ic{width:1.1em;height:1.1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.brand .logo{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#d7dbe3,#9aa3b5);color:#14171c}
+.btn-new{display:flex;align-items:center;justify-content:space-between;background:var(--ink);color:var(--bg);padding:11px 14px;border-radius:12px;font-weight:600;font-size:.88rem}
+.btn-new:active{transform:scale(.98)}
+.history{list-style:none;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.hi{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--mute);font-size:.86rem;cursor:pointer}
+.hi:hover,.hi.active{background:var(--soft);color:var(--ink)}
+.hi span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hi button{color:var(--mute);padding:4px 6px;border-radius:6px}
+.hi button:hover{color:var(--danger)}
+@media(hover:hover){.hi button{opacity:0}.hi:hover button{opacity:1}}
+.side-foot{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:2px}
+.side-foot button{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:.86rem;font-weight:500;text-align:left;width:100%}
+.side-foot button:hover{background:var(--soft)}
+.side-foot .ic{color:var(--mute)}
+.scrim{display:none}
+.sidebar.closed{margin-left:-280px}
+@media(max-width:820px){
+ .sidebar{position:fixed;inset:0 auto 0 0;z-index:50;width:min(300px,86vw);padding-top:calc(16px + var(--sat));box-shadow:0 0 40px rgba(0,0,0,.25);margin-left:0}
+ .sidebar.closed{transform:translateX(-105%);margin-left:0;box-shadow:none}
+ .scrim{display:block;position:fixed;inset:0;background:rgba(10,12,16,.5);backdrop-filter:blur(2px);z-index:40;opacity:0;pointer-events:none;transition:opacity .3s}
+ .scrim.show{opacity:1;pointer-events:auto}
+}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--surface);height:100%}
+.topbar{height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 10px;border-bottom:1px solid var(--line)}
+.icon-btn{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;color:var(--mute);font-size:1.15rem}
+.icon-btn:hover{background:var(--soft);color:var(--ink)}
+.title{font-weight:600;font-size:.92rem;display:flex;align-items:center;gap:8px;min-width:0;padding:8px 12px;border-radius:10px}
+.title .dot{width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0}
+.title .dot.off{background:#f59e0b}
+.title span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:50vw}
+.chat{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;align-items:center;-webkit-overflow-scrolling:touch}
+.feed{width:100%;max-width:780px;display:flex;flex-direction:column;gap:22px}
+.welcome{margin:auto;text-align:center;padding:20px 0;display:flex;flex-direction:column;align-items:center;gap:6px;max-width:520px}
+.welcome.hide{display:none}
+.orb{width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 30% 28%,#fff,#c9ced8 55%,#8e98ac);box-shadow:0 14px 34px rgba(79,95,217,.22),inset -6px -8px 16px rgba(0,0,0,.12);animation:morph 9s ease-in-out infinite;margin-bottom:18px}
+@keyframes morph{0%,100%{border-radius:42% 58% 70% 30%/45% 45% 55% 55%;transform:translateY(0)}50%{border-radius:62% 38% 40% 60%/55% 60% 40% 45%;transform:translateY(-10px)}}
+.welcome h2{font-size:1.5rem;font-weight:700}
+.welcome p{color:var(--mute);font-size:.92rem}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:16px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:.82rem;color:var(--mute);background:var(--bg)}
+.chip:hover{color:var(--ink);border-color:var(--accent)}
+.msg{display:flex;gap:12px;width:100%}
+.msg.user{justify-content:flex-end}
+.bubble{background:var(--soft);padding:11px 16px;border-radius:20px 20px 4px 20px;max-width:85%;font-size:.94rem;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.av{position:relative;width:32px;height:32px;border-radius:50%;flex-shrink:0;overflow:hidden;background:var(--soft);display:grid;place-items:center;color:var(--mute);font-size:.8rem}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.md{flex:1;min-width:0;font-size:.94rem;line-height:1.65;word-break:break-word;padding-top:3px}
+.md>*+*{margin-top:10px}
+.md ul,.md ol{padding-left:22px}
+.md a{color:var(--accent)}
+.md h1,.md h2,.md h3{font-size:1.05rem;margin-top:16px}
+.md pre{background:var(--code);color:#e8eaf0;padding:14px;border-radius:12px;overflow-x:auto;font-size:.82rem;line-height:1.5}
+.md code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;background:var(--soft);padding:2px 6px;border-radius:5px}
+.md pre code{background:none;padding:0}
+.md table{border-collapse:collapse;display:block;overflow-x:auto;font-size:.85rem}
+.md th,.md td{border:1px solid var(--line);padding:6px 10px}
+.md blockquote{border-left:3px solid var(--line);padding-left:12px;color:var(--mute)}
+.err{color:var(--danger);font-size:.9rem}
+.think{display:inline-flex;align-items:center;gap:8px;color:var(--mute);font-size:.88rem;padding:6px 0}
+.think i{width:5px;height:5px;border-radius:50%;background:var(--mute);animation:fl 1.2s infinite both}
+.think i:nth-child(3){animation-delay:.2s}.think i:nth-child(4){animation-delay:.4s}
+@keyframes fl{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1.3)}}
+.composer{padding:10px 14px calc(12px + var(--sab));display:flex;justify-content:center;background:var(--surface)}
+.box{width:100%;max-width:780px;display:flex;align-items:flex-end;gap:10px;background:var(--bg);border:1px solid var(--line);border-radius:24px;padding:8px 8px 8px 18px;transition:border-color .2s,box-shadow .2s}
+.box:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.box textarea{flex:1;border:none;outline:none;background:none;resize:none;font:inherit;font-size:1rem;color:var(--ink);line-height:1.5;max-height:160px;padding:7px 0}
+.send{width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex-shrink:0}
+.send:disabled{opacity:.4}
+.send:active{transform:scale(.92)}
+.hint{text-align:center;font-size:.7rem;color:var(--mute);padding:0 12px calc(6px + var(--sab));display:none}
+@media(min-width:821px){.hint{display:block}.chat{padding:28px 24px}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"/></symbol>
+<symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+<symbol id="i-gem" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9zM2 9h20M12 21L8 9l4-6 4 6"/></symbol>
+</defs></svg>
+<div class="app">
+ <aside class="sidebar closed" id="sidebar">
+  <div class="brand"><span class="logo"><svg class="ic"><use href="#i-gem"/></svg></span><span>PlatinumAI</span></div>
+  <button class="btn-new" onclick="newChat()"><span>Obrolan baru</span><svg class="ic"><use href="#i-plus"/></svg></button>
+  <ul class="history" id="history"></ul>
+  <div class="side-foot">
+   <button onclick="toggleTheme()"><svg class="ic"><use href="#i-theme"/></svg>Ganti tema</button>
+  </div>
+ </aside>
+ <div class="scrim" id="scrim" onclick="toggleSidebar(false)"></div>
+
+ <main class="main">
+  <header class="topbar">
+   <button class="icon-btn" onclick="toggleSidebar()" aria-label="Menu"><svg class="ic"><use href="#i-menu"/></svg></button>
+   <div class="title"><i class="dot off" id="dot"></i><span id="modelTitle"></span></div>
+   <button class="icon-btn" onclick="newChat()" aria-label="Obrolan baru"><svg class="ic"><use href="#i-edit"/></svg></button>
+  </header>
+
+  <div class="chat" id="chat">
+   <div class="welcome" id="welcome">
+    <div class="orb"></div>
+    <h2>Halo, mau bahas apa hari ini?</h2>
+    <p>Tanya apa saja ke PlatinumAI.</p>
+    <div class="chips">
+     <button class="chip" onclick="quick(this)">Jelaskan cara kerja blockchain</button>
+     <button class="chip" onclick="quick(this)">Buatkan ide konten Instagram</button>
+     <button class="chip" onclick="quick(this)">Bantu debug kode JavaScript</button>
+    </div>
+   </div>
+   <div class="feed" id="feed"></div>
+  </div>
+
+  <div class="composer">
+   <div class="box">
+    <textarea id="input" rows="1" placeholder="Ketik pesan..." enterkeyhint="send"></textarea>
+    <button class="send" id="sendBtn" onclick="send()" aria-label="Kirim"><svg class="ic"><use href="#i-up"/></svg></button>
+   </div>
+  </div>
+  <div class="hint">Enter untuk kirim · Shift+Enter untuk baris baru</div>
+ </main>
+</div>
+
+<script>
+/* ==================== KONFIGURASI ==================== */
+const modelName = "gpt-4o-mini";               // GANTI sesuai model yang tersedia di tokenmurah.net
+const displayName = "PlatinumAI 1"; 
+const SYSTEM_PROMPT = "";   
+const AVATAR = "https://files.catbox.moe/djm1ag.png";
+const PROXY_URL = "/v1/chat/completions";  // relatif, otomatis ke domain Vercel
+
+const $=id=>document.getElementById(id);
+const ls={get:(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+let sessions=[];try{sessions=JSON.parse(ls.get('pai_sessions','[]'))||[]}catch(e){}
+let cur=ls.get('pai_cur',null),busy=false;
+
+const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c]));
+const md=t=>DOMPurify.sanitize(marked.parse(t,{breaks:true}));
+const save=()=>{ls.set('pai_sessions',JSON.stringify(sessions));cur?ls.set('pai_cur',cur):0};
+const isMobile=()=>matchMedia('(max-width:820px)').matches;
+
+function toggleSidebar(f){
+ const s=$('sidebar'), scrim=$('scrim');
+ const open=f===undefined?s.classList.contains('closed'):f;
+ s.classList.toggle('closed',!open);
+ if(isMobile()){scrim.classList.toggle('show',open);}
+}
+function toggleTheme(){const r=document.documentElement,d=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);r.dataset.theme=d?'light':'dark';ls.set('pai_theme',r.dataset.theme)}
+const ic=n=>`<svg class="ic"><use href="#i-${n}"/></svg>`;
+const model=modelName;
+function refreshStatus(){$('modelTitle').textContent=displayName||model;$('dot').classList.remove('off')}
+
+function renderHistory(){
+ const ul=$('history');ul.innerHTML='';
+ sessions.forEach(s=>{const li=document.createElement('li');li.className='hi'+(s.id===cur?' active':'');
+  li.innerHTML=`${ic('msg')}<span>${esc(s.title)}</span><button aria-label="Hapus">${ic('trash')}</button>`;
+  li.onclick=()=>{loadSession(s.id);if(isMobile())toggleSidebar(false)};
+  li.querySelector('button').onclick=e=>{e.stopPropagation();sessions=sessions.filter(x=>x.id!==s.id);if(cur===s.id){newChat()}else{renderHistory()}save()};
+  ul.appendChild(li)});
+}
+function newChat(){cur=null;try{localStorage.removeItem('pai_cur')}catch(e){}$('feed').innerHTML='';$('welcome').classList.remove('hide');renderHistory();if(isMobile())toggleSidebar(false)}
+function addUser(t){const d=document.createElement('div');d.className='msg user';d.innerHTML=`<div class="bubble">${esc(t)}</div>`;$('feed').appendChild(d)}
+function addAI(html){const d=document.createElement('div');d.className='msg';d.innerHTML=`<div class="av">${ic('gem')}<img src="${AVATAR}" alt="" onerror="this.remove()"></div><div class="md">${html||''}</div>`;$('feed').appendChild(d);return d.querySelector('.md')}
+function loadSession(id){
+ const s=sessions.find(x=>x.id===id);if(!s)return;cur=id;save();renderHistory();
+ if(!s.messages.length){newChat();return}
+ $('welcome').classList.add('hide');$('feed').innerHTML='';
+ s.messages.forEach(m=>m.role==='user'?addUser(m.content):addAI(md(m.content)));scrollDown(true);
+}
+function scrollDown(instant){const c=$('chat');c.scrollTo({top:c.scrollHeight,behavior:instant?'auto':'smooth'})}
+function quick(el){$('input').value=el.textContent;send()}
+
+async function errText(r){
+ const t=await r.text().catch(()=>'');let m=t;
+ try{const j=JSON.parse(t);m=j.error?.message||(typeof j.error==='string'?j.error:'')||j.message||j.detail||t}catch(e){}
+ return `HTTP ${r.status}${m?': '+String(m).slice(0,240):''}`;
+}
+
+async function callAPI(msgs,onDelta){
+ const messages=(SYSTEM_PROMPT?[{role:'system',content:SYSTEM_PROMPT}]:[]).concat(msgs.map(m=>({role:m.role==='user'?'user':'assistant',content:m.content})));
+ 
+ const controller=new AbortController();
+ const timeoutId=setTimeout(()=>controller.abort(),35000); 
+
+ try {
+  const r=await fetch(PROXY_URL,{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({model,messages}),
+   signal:controller.signal
+  });
+  
+  clearTimeout(timeoutId);
+
+  if(!r.ok){
+   const errorMsg = await errText(r);
+   throw new Error(errorMsg);
+  }
+  
+  const d=await r.json().catch(()=>({}));
+  let t=d.choices?.[0]?.message?.content??d.choices?.[0]?.text??'';
+  if(Array.isArray(t))t=t.map(p=>p.text||'').join('');
+  if(!t&&Array.isArray(d.content))t=d.content.map(p=>p.text||'').join('');
+  
+  if(!t)throw new Error('Respons kosong atau format dari server tidak dikenali.');
+  onDelta(t);
+  return t;
+ } catch (err) {
+  clearTimeout(timeoutId);
+  if(err.name==='AbortError'){
+   throw new Error('Server terlalu lama merespons (Timeout). Silakan coba kirim ulang.');
+  }
+  throw new Error(err.message || 'Gagal terhubung ke server.');
+ }
+}
+
+async function send(){
+ if(busy)return;const inp=$('input'),text=inp.value.trim();if(!text)return;
+ busy=true;$('sendBtn').disabled=true;inp.value='';autoGrow();
+ $('welcome').classList.add('hide');
+ if(!cur){cur='s_'+Date.now();sessions.unshift({id:cur,title:text.length>32?text.slice(0,32)+'…':text,messages:[]})}
+ const s=sessions.find(x=>x.id===cur);s.messages.push({role:'user',content:text});save();renderHistory();
+ addUser(text);
+ 
+ const box=addAI('<span class="think">Berpikir<i></i><i></i><i></i></span>');
+ scrollDown();
+ 
+ try{
+  const reply=await callAPI(s.messages,t=>{box.innerHTML=md(t);scrollDown(true)});
+  s.messages.push({role:'model',content:reply});save();
+ }catch(e){
+  box.innerHTML=`<span class="err">Gagal: ${esc(e.message)}</span>`;
+  s.messages.pop();if(!s.messages.length)sessions=sessions.filter(x=>x!==s);save();renderHistory();
+ }
+ busy=false;$('sendBtn').disabled=false;if(!isMobile())inp.focus();
+}
+
+function autoGrow(){const i=$('input');i.style.height='auto';i.style.height=Math.min(i.scrollHeight,160)+'px'}
+$('input').addEventListener('input',autoGrow);
+$('input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!isMobile()){e.preventDefault();send()}});
+addEventListener('resize',()=>{if(!isMobile())$('scrim').classList.remove('show')});
+
+(function init(){
+ const th=ls.get('pai_theme',null);if(th)document.documentElement.dataset.theme=th;
+ if(isMobile()){
+  $('sidebar').classList.add('closed');
+  $('scrim').classList.remove('show');
+ }
+ renderHistory();refreshStatus();
+ if(cur&&sessions.some(s=>s.id===cur))loadSession(cur);
+})();
+</script>
+</body>
+</html>

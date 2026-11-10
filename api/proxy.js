@@ -12,11 +12,7 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: { message: 'API_KEY belum diset di Environment Variables Vercel.' } });
   }
 
-  const pathParam = req.query.path;
-  let endpoint = pathParam
-    ? (Array.isArray(pathParam) ? pathParam.join('/') : pathParam)
-    : '';
-  endpoint = '/' + endpoint.replace(/^\/+/, '');
+  const endpoint = '/v1/chat/completions';
 
   const hasBody = req.method !== 'GET' && req.method !== 'HEAD';
   const body = hasBody

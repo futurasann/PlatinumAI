@@ -149,11 +149,11 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 
 <script>
 /* ==================== KONFIGURASI ==================== */
-const modelName = "gpt-4o-mini";               // GANTI sesuai model yang tersedia di tokenmurah.net
-const displayName = "PlatinumAI 1"; 
+const modelName = "auto";               // GANTI sesuai model yang tersedia di tokenmurah.net
+const displayName = "PlatinumAI I"; 
 const SYSTEM_PROMPT = "";   
 const AVATAR = "https://files.catbox.moe/djm1ag.png";
-const PROXY_URL = "/v1/chat/completions";  // relatif, otomatis ke domain Vercel
+const PROXY_URL = "https://platinum.futuramobile25.workers.dev/v1/chat/completions";  // relatif, otomatis ke domain Vercel
 
 const $=id=>document.getElementById(id);
 const ls={get:(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
